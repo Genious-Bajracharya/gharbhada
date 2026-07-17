@@ -86,11 +86,11 @@ export default function LeasesPage() {
                 )}
 
                 {pendingPayments.length > 0 && (
-                  <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex items-center justify-between">
+                  <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-xs font-medium text-yellow-700">{pendingPayments.length} payment{pendingPayments.length > 1 ? "s" : ""} pending</p>
                     <button
                       onClick={() => setPaymentLeaseId(lease.id)}
-                      className="text-xs font-semibold text-white bg-yellow-500 px-3 py-1 rounded-lg hover:bg-yellow-600 transition-colors"
+                      className="text-xs font-semibold text-white bg-yellow-500 px-3 py-1.5 rounded-lg hover:bg-yellow-600 transition-colors w-full sm:w-auto"
                     >
                       Pay Now
                     </button>

@@ -218,17 +218,20 @@ export default function NewPropertyPage() {
                 {errors.district && <p className="text-red-500 text-xs mt-1">{errors.district.message}</p>}
               </div>
             </div>
-            <button type="button" onClick={getLocation} className="flex items-center gap-2 text-sm text-red-600 font-medium hover:underline mb-3">
-              <MapPin size={15} /> {locating ? "Getting location..." : "Use my current location"}
-            </button>
             <LocationPicker
               lat={watch("lat") || 27.7172}
               lng={watch("lng") || 85.324}
-              onLocationChange={(lat, lng) => {
+              onLocationChange={(lat, lng, address, city, district) => {
                 setValue("lat", lat);
                 setValue("lng", lng);
+                if (address) setValue("address", address);
+                if (city) setValue("city", city);
+                if (district) setValue("district", district);
               }}
             />
+            <button type="button" onClick={getLocation} className="flex items-center gap-2 text-sm text-red-600 font-medium hover:underline mt-3">
+              <MapPin size={15} /> {locating ? "Getting location..." : "Or use my current location"}
+            </button>
           </section>
 
           {/* Property Details */}

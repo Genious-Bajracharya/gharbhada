@@ -3,13 +3,23 @@
 import Link from "next/link";
 import { useAuthStore } from "@/store/auth.store";
 import { useState, useRef, useEffect } from "react";
-import { Menu, X, Home, Plus, User } from "lucide-react";
+import { Menu, X, Home, Plus, User, AlertCircle } from "lucide-react";
+import api from "@/lib/axios";
 
 export default function Navbar() {
   const { user, clearAuth } = useAuthStore();
   const [open, setOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [kycStatus, setKycStatus] = useState<string>("NOT_SUBMITTED");
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (user) {
+      api.get("/users/me")
+        .then((r) => setKycStatus(r.data.data.kyc?.status || "NOT_SUBMITTED"))
+        .catch(() => {});
+    }
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -98,7 +108,14 @@ export default function Navbar() {
           {user ? (
             <>
               <Link href={dashboardHref} onClick={() => setOpen(false)}>Dashboard</Link>
-              <Link href="/dashboard/kyc" onClick={() => setOpen(false)}>KYC</Link>
+              <Link href="/dashboard/kyc" className="flex items-center gap-2" onClick={() => setOpen(false)}>
+                KYC
+                {kycStatus !== "VERIFIED" && (
+                  <span className="text-xs font-semibold px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full flex items-center gap-1">
+                    <AlertCircle size={12} /> Verify
+                  </span>
+                )}
+              </Link>
               {user.role === "LANDLORD" && (
                 <Link href="/dashboard/saved" onClick={() => setOpen(false)}>Saved Properties</Link>
               )}

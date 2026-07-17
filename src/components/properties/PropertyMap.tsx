@@ -17,12 +17,10 @@ export default function PropertyMap({ properties, onPropertyClick, height = "h-9
 
   const icon = useMemo(() =>
     L.icon({
-      iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-red.png",
-      shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41],
+      iconUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 40' fill='none'%3E%3Cpath d='M16 2C10.48 2 6 6.48 6 12c0 6 10 26 10 26s10-20 10-26c0-5.52-4.48-10-10-10z' fill='%23dc2626'/%3E%3Ccircle cx='16' cy='12' r='3.5' fill='white'/%3E%3C/svg%3E`,
+      iconSize: [32, 40],
+      iconAnchor: [16, 40],
+      popupAnchor: [0, -40],
     }),
     []
   );

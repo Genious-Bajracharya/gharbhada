@@ -30,8 +30,10 @@ export default function AdminKycPage() {
 
   useEffect(() => {
     if (!user || user.role !== "ADMIN") { router.push("/dashboard"); return; }
-    // Would fetch from /api/kyc endpoint
-    setLoading(false);
+    api.get("/admin/kyc")
+      .then((r) => setKycList(r.data.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [user, router]);
 
   const handleReview = async (userId: string, status: "VERIFIED" | "REJECTED") => {
@@ -79,7 +81,7 @@ export default function AdminKycPage() {
                 <span className="text-xs font-medium px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full">PENDING</span>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 {[
                   { label: "Citizenship - Front", url: k.citizenshipFront },
                   { label: "Citizenship - Back", url: k.citizenshipBack },

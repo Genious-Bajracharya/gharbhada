@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import api from "@/lib/axios";
+import { showToast } from "@/components/Toast";
 import { Upload, Check, Clock, X, Camera } from "lucide-react";
 
 const schema = z.object({
@@ -26,9 +28,32 @@ export default function KYCPage() {
   const [status, setStatus] = useState<"NOT_SUBMITTED" | "PENDING" | "VERIFIED" | "REJECTED">("NOT_SUBMITTED");
   const [rejectedReason, setRejectedReason] = useState("");
   const [uploading, setUploading] = useState<string | null>(null);
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const [loading, setLoading] = useState(true);
+  const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  useEffect(() => {
+    const fetchKyc = async () => {
+      try {
+        const { data } = await api.get("/users/me");
+        if (data.data.kyc) {
+          setStatus(data.data.kyc.status);
+          if (data.data.kyc.rejectedReason) setRejectedReason(data.data.kyc.rejectedReason);
+          // Pre-fill form with existing KYC data
+          setValue("citizenshipFront", data.data.kyc.citizenshipFront);
+          setValue("citizenshipBack", data.data.kyc.citizenshipBack);
+          setValue("selfie", data.data.kyc.selfie);
+          setValue("citizenshipNo", data.data.kyc.citizenshipNo);
+        }
+      } catch (err) {
+        console.error("Failed to load KYC:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchKyc();
+  }, [setValue]);
 
   const handleImageUpload = async (file: File, field: keyof FormData) => {
     setUploading(field);
@@ -36,10 +61,12 @@ export default function KYCPage() {
       const form = new FormData();
       form.append("images", file);
       const { data } = await api.post("/uploads/images", form);
-      register(field, { value: data.data.urls[0] });
+      const url = data.data.urls[0];
+      setValue(field, url);
+      showToast("Image uploaded successfully", "success");
       setUploading(null);
     } catch {
-      alert("Image upload failed");
+      showToast("Image upload failed", "error");
       setUploading(null);
     }
   };
@@ -48,9 +75,9 @@ export default function KYCPage() {
     try {
       await api.post("/users/kyc", data);
       setStatus("PENDING");
-      alert("KYC submitted for review");
+      showToast("KYC submitted for review! You'll be notified via email.", "success");
     } catch (err: any) {
-      alert(err.response?.data?.message ?? "Failed to submit KYC");
+      showToast(err.response?.data?.message ?? "Failed to submit KYC", "error");
     }
   };
 
@@ -59,6 +86,21 @@ export default function KYCPage() {
   const selfie = watch("selfie");
 
   const statusInfo = status !== "NOT_SUBMITTED" ? STATUS_STYLES[status] : null;
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="max-w-2xl mx-auto px-4 py-8">
+          <div className="space-y-4 animate-pulse">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-24 bg-gray-100 rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

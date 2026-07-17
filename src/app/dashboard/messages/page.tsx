@@ -6,7 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios";
 import { connectSocket, disconnectSocket } from "@/lib/socket";
-import { Send } from "lucide-react";
+import { Send, ChevronLeft } from "lucide-react";
 
 interface Message {
   id: string;
@@ -89,8 +89,8 @@ export default function MessagesPage() {
       <div className="max-w-4xl mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Messages</h1>
         <div className="bg-white border border-gray-100 rounded-2xl shadow-sm flex overflow-hidden" style={{ height: "calc(100vh - 180px)", minHeight: 500 }}>
-          {/* Conversations list */}
-          <div className="w-64 shrink-0 border-r border-gray-100 overflow-y-auto">
+          {/* Conversations list - hidden on mobile when selected */}
+          <div className={`border-r border-gray-100 overflow-y-auto transition-all ${selected ? "hidden sm:block sm:w-48 md:w-64" : "w-full sm:w-48 md:w-64"}`}>
             {conversations.length === 0 && (
               <p className="text-center text-gray-400 text-sm py-10">No conversations yet</p>
             )}
@@ -110,13 +110,20 @@ export default function MessagesPage() {
           </div>
 
           {/* Chat area */}
-          <div className="flex-1 flex flex-col">
+          <div className={`flex-1 flex flex-col transition-all ${selected ? "block" : "hidden sm:flex"}`}>
             {!selected ? (
               <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
                 Select a conversation
               </div>
             ) : (
               <>
+                {/* Mobile back button */}
+                <div className="sm:hidden border-b border-gray-100 px-4 py-3 flex items-center">
+                  <button onClick={() => setSelected(null)} className="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm">
+                    <ChevronLeft size={16} /> Back
+                  </button>
+                </div>
+
                 <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
                   {messages.map((m) => {
                     const isMe = m.senderId === user.id;

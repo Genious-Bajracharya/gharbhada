@@ -12,9 +12,10 @@ import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios";
 
 const PropertyMap = dynamic(() => import("@/components/properties/PropertyMap"), { ssr: false });
+const PropertyReviews = dynamic(() => import("@/components/properties/PropertyReviews"), { ssr: false });
 import {
   MapPin, Bed, Bath, Maximize2, Eye, Phone, MessageCircle,
-  CheckCircle, Home, ChevronLeft, ChevronRight, Play
+  CheckCircle, Home, ChevronLeft, ChevronRight, Play, Star
 } from "lucide-react";
 
 const FEATURE_LABELS: Record<string, string> = {
@@ -41,10 +42,19 @@ export default function PropertyDetailPage() {
   const [imgIndex, setImgIndex] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
   const [contacting, setContacting] = useState(false);
+  const [averageRating, setAverageRating] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
 
   useEffect(() => {
-    api.get(`/properties/${id}`)
-      .then((r) => setProperty(r.data.data))
+    Promise.all([
+      api.get(`/properties/${id}`),
+      api.get(`/properties/${id}/reviews?limit=1`)
+    ])
+      .then(([propRes, reviewRes]) => {
+        setProperty(propRes.data.data);
+        setAverageRating(reviewRes.data.data.averageRating || 0);
+        setReviewCount(reviewRes.data.data.total || 0);
+      })
       .catch(() => router.push("/properties"))
       .finally(() => setLoading(false));
   }, [id, router]);
@@ -199,6 +209,8 @@ export default function PropertyDetailPage() {
               <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{property.description}</p>
             </div>
 
+            <PropertyReviews propertyId={id} landlordId={property.landlord.id} />
+
             <div>
               <h2 className="font-semibold text-gray-900 mb-3">Location on Map</h2>
               <PropertyMap properties={[property]} />
@@ -214,6 +226,23 @@ export default function PropertyDetailPage() {
               </p>
               {property.negotiable && <p className="text-xs text-gray-500 mt-1">Price is negotiable</p>}
               {property.deposit && <p className="text-sm text-gray-600 mt-1">Deposit: Rs. {property.deposit.toLocaleString()}</p>}
+
+              {reviewCount > 0 && (
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        size={14}
+                        className={i < Math.round(averageRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs font-medium text-gray-600">
+                    {averageRating.toFixed(1)} ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
+                  </span>
+                </div>
+              )}
 
               <div className="border-t border-gray-100 my-4" />
 
