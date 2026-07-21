@@ -25,8 +25,8 @@ export default function LoginPage() {
   const onSubmit = async (data: FormData) => {
     try {
       const res = await api.post("/auth/login", data);
-      const { user, accessToken, refreshToken } = res.data.data;
-      setAuth(user, accessToken, refreshToken);
+      const user = res.data.data;
+      setAuth(user);
       router.push(user.role === "ADMIN" ? "/admin" : "/dashboard");
     } catch (err: any) {
       setError("root", { message: err.response?.data?.message ?? "Login failed" });
