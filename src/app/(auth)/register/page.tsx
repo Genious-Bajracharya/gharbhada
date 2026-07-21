@@ -34,8 +34,8 @@ function RegisterForm() {
     try {
       const payload = { ...data, email: data.email || undefined };
       const res = await api.post("/auth/register", payload);
-      const { user, accessToken, refreshToken } = res.data.data;
-      setAuth(user, accessToken, refreshToken);
+      const { user } = res.data.data;
+      setAuth(user);
       router.push("/dashboard");
     } catch (err: any) {
       setError("root", { message: err.response?.data?.message ?? "Registration failed" });
