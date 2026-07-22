@@ -5,7 +5,6 @@ import { useAuthStore } from "@/store/auth.store";
 import { useState, useRef, useEffect } from "react";
 import { Menu, X, Home, Plus, User, AlertCircle } from "lucide-react";
 import api from "@/lib/axios";
-
 export default function Navbar() {
   const { user, clearAuth } = useAuthStore();
   const [open, setOpen] = useState(false);
@@ -33,6 +32,24 @@ export default function Navbar() {
 
   const dashboardHref =
     user?.role === "ADMIN" ? "/admin" : "/dashboard";
+
+    const handleLogout = async () => {
+      try {
+        await api.post(
+          "/auth/logout",
+          {},
+          {
+            withCredentials: true,
+          }
+        );
+      } catch (err) {
+        console.error(err);
+      } finally {
+        clearAuth();
+        setOpen(false);
+        window.location.href = "/";
+      }
+    };
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -75,7 +92,7 @@ export default function Navbar() {
                       </Link>
                     )}
                     <button
-                      onClick={() => { clearAuth(); window.location.href = "/"; setDropdownOpen(false); }}
+                      onClick={handleLogout}
                       className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors border-t border-gray-100 text-red-600 font-medium"
                     >
                       Logout

@@ -27,7 +27,7 @@ export default function LoginPage() {
       const res = await api.post("/auth/login", data);
       const user = res.data.data;
       setAuth(user);
-      router.push(user.role === "ADMIN" ? "/admin" : "/dashboard");
+      router.push(user.role === "ADMIN" ? "/admin" : "/");
     } catch (err: any) {
       setError("root", { message: err.response?.data?.message ?? "Login failed" });
     }

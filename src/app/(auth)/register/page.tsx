@@ -36,7 +36,7 @@ function RegisterForm() {
       const res = await api.post("/auth/register", payload);
       const { user } = res.data.data;
       setAuth(user);
-      router.push("/dashboard");
+      router.push("/");
     } catch (err: any) {
       setError("root", { message: err.response?.data?.message ?? "Registration failed" });
     }
